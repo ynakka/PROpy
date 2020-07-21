@@ -28,7 +28,7 @@ List of Functions:
 
     7) lvlh_to_eci transformations
 
-    8) eci_to_lvlh trasnsformations 
+    8) eci_to_lvlh transformations 
 
     9) initial_conditions 
     
@@ -421,36 +421,36 @@ def rotation_matrix_eci_to_lvlh(omega,theta,inc):
 
 #TODO: make default conditions for initial_condition_type or other failure mode?
 
-def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu,r_e,J2):
+def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu=398600.4418,r_e=6378.1363,J2=1082.64*10**(-6)):
     
     """
     Return a state vector containing the chief orbital parameters and the
-    inital state of the deputies for the desired swarm type by computing
-    the required intial velocities.
+    initial state of the deputies for the desired swarm type by computing
+    the required initial velocities.
     
     Parameters
     ----------
     initial_condition_type : string
-        Specifies the type of swarm to intialize
+        Specifies the type of swarm to initialize
     input_info : array
         Contents of the array are:
-            NoRev = input_info[0]: Number of orbits
-        Cheif Orbit parameters:
+            input_info[0]: Number of orbits
+            Chief Orbit parameters:
             input_info[1]: Orbit altitude in km
             input_info[2]: Orbit eccentricity
             input_info[3]: Orbit inclination (degrees)
-            input_info[4]: Right Assencion of the Ascending Node (degrees)
+            input_info[4]: Right Ascension of the Ascending Node (degrees)
             input_info[5]: Argument of Perigee (degrees)
-            input_info[6]: True Anomoly (degrees)
+            input_info[6]: True Anomaly (degrees)
             input_info[7]: Number of deputies
     initial_xyz : array, shape (number of deputies, 3)
-        The inital LVLH position of each deputy relative to the cheif. UNITS???
+        The initial LVLH position of each deputy relative to the chief. UNITS???
     mu : double
-        Earth gravitational constant (km^3/s^2)
+        Gravitational constant (km^3/s^2). The default is 398600.4418 for Earth.
     r_e : double 
-        Earth radius (km)
+        Planet radius (km). The default is 6378.1363 for Earth.
     J2 : double
-        Earth J2 coefficient 
+        J2 coefficient. The default is 1082.64*10**(-6) for Earth.
 
     Returns
     -------
@@ -475,28 +475,20 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
 
     deputy_num = int(input_info[7]) 
 
+    k_J2 = (3/2)*J2*mu*(r_e**2)     # J2 "force" coefficient. For Earth it is 2.633*10**10, km**5/s**2
 
-
-    ##----Constants--------------
-
-    # mu = 398600.4418  #gravitational constant
-    # r_e = 6378.1363   # Earth Radius 
-    # J2 = 1082.64*10**(-6) #J2 Constant
-
-    k_J2 = (3/2)*J2*mu*(r_e**2)
-
-    # Orbital Elements
-    a = r_e + altitude           # semimajor axis [km]
+    # Orbital Elements (converting to radians)
+    a = r_e + altitude              # semimajor axis [km]
     inc = INC*np.pi/180             # inclination [rad]
     Omega = Om*np.pi/180            # RAAN [rad]
     omega = om*np.pi/180            # Arg of Per [rad]
     nu = f*np.pi/180                # True Anomaly [rad]
 
-    # Xu Wang Parameters
-    h = np.sqrt(a*(1 - ecc**2)*mu)           # angular momentum [km**2/s]
-    r = h**2/((1 + ecc*np.cos(nu))*mu)       # geocentric distance [km]
+    # Xu Wang Parameters (https://arc.aiaa.org/doi/10.2514/1.33616)
+    h = np.sqrt(a*(1 - ecc**2)*mu)          # angular momentum [km**2/s]
+    r = h**2/((1 + ecc*np.cos(nu))*mu)      # geocentric distance [km]
     v_x = mu*ecc/h*np.sin(nu)               # radial velocity [km/s]
-    theta = omega + nu                   # argument of latitude [rad]
+    theta = omega + nu                      # argument of latitude [rad]
 
     # chief velocity
     v_c = np.sqrt(mu*(2/r - 1/a)) 
@@ -504,32 +496,30 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     # Number of Satellites
     sat_num = int(deputy_num + 1) 
     
-     # Gradient of Gravitational Potential Energy (U)           
-    gradU_x = mu/r**2 + k_J2/r**4*(1 - 3*np.sin(inc)**2*np.sin(theta)**2)       # x component of gradient of U
-    gradU_y = k_J2*np.sin(inc)**2*np.sin(2*theta)/r**4                        # y component of gradient of U
-    gradU_z = k_J2*np.sin(2*inc)*np.sin(theta)/r**4                          # z component of gradient of U
+    # Gradient of Gravitational Potential Energy (U)           
+    gradU_x = mu/r**2 + k_J2/r**4*(1 - 3*np.sin(inc)**2*np.sin(theta)**2)   # x component of gradient of U
+    gradU_y = k_J2*np.sin(inc)**2*np.sin(2*theta)/r**4                      # y component of gradient of U
+    gradU_z = k_J2*np.sin(2*inc)*np.sin(theta)/r**4                         # z component of gradient of U
     gradU_xy = np.sqrt(gradU_x**2 + gradU_y**2)  
-    gradU_mag = np.sqrt(gradU_xy**2 + gradU_z**2)                          # magnitude of gradient of U
+    gradU_mag = np.sqrt(gradU_xy**2 + gradU_z**2)                           # magnitude of gradient of U
     alpha = math.atan2(gradU_y,gradU_x)                                     # first rotation angle
     beta = math.atan2(gradU_z,gradU_xy)                                     # second rotation angle
-    w = np.sqrt(gradU_mag/r)                                             # total rotation rate of LVLH frame
-    w_x = -3/2*mu*J2*r_e**2*np.sin(2*inc)*np.sin(theta)/(h*r**3)              # precession rate of LVLH frame
+    w = np.sqrt(gradU_mag/r)                                                # total rotation rate of LVLH frame
+    w_x = -3/2*mu*J2*r_e**2*np.sin(2*inc)*np.sin(theta)/(h*r**3)            # precession rate of LVLH frame
     w_z = h/r**2                                                      
 
-     # effective period of the orbit
+    # effective period of the orbit
     a_bar = a*(1 + 3*J2*r_e**2*(1-ecc**2)**0.5/(4*h**4/mu**2)*(3*np.cos(inc)**2 - 1))**(-2/3)  
     period = 2*np.pi/np.sqrt(mu)*a_bar**(3/2)  
-    n = h/r**2                       # orbital rotation rate for non J2
+    n = h/r**2                                                              # orbital rotation rate for non J2
     Pot_c = -mu/r - k_J2/(3*r**3)*(1 - 3*np.sin(inc)**2*np.sin(theta)**2)  
 
 
-    if math.tan(theta) <4:
-        tanth = math.tan(theta)
-    else:
-        tanth = 4
-
+    tanth = math.tan(theta)
+    if math.tan(theta) > 4:
+        tanth =4
     
-    # initial conditions for the chief 
+    # initial conditions for the chief (orbit parameters)
 
     r0 = a
     h0 = np.sqrt(r0*(1-ecc**2)*mu)
@@ -540,15 +530,17 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
 
     ys = np.zeros([sat_num*6],dtype = float)
 
-    ys[0] = r0
-    ys[1] = vx0
-    ys[2] = h0
-    ys[3] = Omega0
-    ys[4] = inc0
-    ys[5] = theta0
+    ys[0] = r0          #Semi major axis
+    ys[1] = vx0         #
+    ys[2] = h0          #Angular momentum
+    ys[3] = Omega0      #
+    ys[4] = inc0        #
+    ys[5] = theta0      #
     
-    # initial conditions in LVLH
+    # Initialize the initial conditions for the deputies in LVLH, 
+    # as specified by the swarm dynamics requested
 
+    # Uncontrolled Swarm, no relative velocity to chief, will drift
     if initial_condition_type == "uncontrolled_swarm":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
@@ -562,6 +554,7 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+5] = 0
         return ys
 
+    # Linearized period matching, solves HCW equations, will drift
     if initial_condition_type == "linearized_period_matched_swarm":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
@@ -574,7 +567,10 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+4] = -2*n*x
             ys[6*(i+1)+5] = 0
         return ys
-        
+    
+    # Linearized period matching. Initializes the swarm in concentric 
+    # circular PROs to minimize collisions by solving HCW equations, 
+    # will drift
     if initial_condition_type == "linearized_concentric_pro_swarm":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
@@ -587,7 +583,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+4] = -2*n*x
             ys[6*(i+1)+5] = 0
         return ys
-
+    
+    # An improvement on the previous case that adds periodic cross-track
+    # motion that will not grow under J2, will drift.
     if initial_condition_type == "no_crosstrack_drift_swarm":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
@@ -601,6 +599,8 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+5] = -n*z*tanth
         return ys
     
+    # Computes the needed initial velocity for a swarm that is invariant
+    # under linear J2 conditions, will drift due to nonlinearities.
     if initial_condition_type == "linearized_j2_invariant_swarm":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
@@ -640,6 +640,8 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+5] = dzi_j 
         return ys 
 
+    # Computes the non linear initial conditions to be invariant under J2. 
+    # Will drift at ~ 8mm/orbit under only J2 dynamics. 
     if initial_condition_type == "nonlinear_correction_linearized_j2_invariant":
         for i in range(deputy_num):
             x = initial_xyz[i,0]
