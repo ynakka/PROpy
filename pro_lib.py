@@ -521,21 +521,14 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     
     # initial conditions for the chief (orbit parameters)
 
-    r0 = a
-    h0 = np.sqrt(r0*(1-ecc**2)*mu)
-    vx0 = mu*ecc/(h0*np.sin(nu))
-    Omega0 = Omega
-    inc0 = inc
-    theta0 = omega + nu
-
     ys = np.zeros([sat_num*6],dtype = float)
 
-    ys[0] = r0          #Semi major axis
-    ys[1] = vx0         #
-    ys[2] = h0          #Angular momentum
-    ys[3] = Omega0      #
-    ys[4] = inc0        #
-    ys[5] = theta0      #
+    ys[0] = r         #Semi major axis
+    ys[1] = v_x         #
+    ys[2] = h          #Angular momentum
+    ys[3] = Omega      #
+    ys[4] = inc       #
+    ys[5] = theta      #
     
     # Initialize the initial conditions for the deputies in LVLH, 
     # as specified by the swarm dynamics requested
@@ -546,9 +539,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             x = initial_xyz[i,0]
             y = initial_xyz[i,1]
             z = initial_xyz[i,2]
-            ys[6*i+6] = initial_xyz[i,0]
-            ys[6*(i+1)+1] = initial_xyz[i,1]
-            ys[6*(i+1)+2] = initial_xyz[i,2]
+            ys[6*i+6] = x
+            ys[6*(i+1)+1] = y
+            ys[6*(i+1)+2] = z
             ys[6*(i+1)+3] = 0
             ys[6*(i+1)+4] = 0
             ys[6*(i+1)+5] = 0
@@ -560,9 +553,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             x = initial_xyz[i,0]
             y = initial_xyz[i,1]
             z = initial_xyz[i,2]
-            ys[6*i+6] = initial_xyz[i,0]
-            ys[6*(i+1)+1] = initial_xyz[i,1]
-            ys[6*(i+1)+2] = initial_xyz[i,2]
+            ys[6*i+6] = x
+            ys[6*(i+1)+1] = y
+            ys[6*(i+1)+2] = z
             ys[6*(i+1)+3] = 0
             ys[6*(i+1)+4] = -2*n*x
             ys[6*(i+1)+5] = 0
@@ -591,9 +584,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             x = initial_xyz[i,0]
             y = initial_xyz[i,1]
             z = initial_xyz[i,2]
-            ys[6*i+6] = initial_xyz[i,0]
-            ys[6*(i+1)+1] = initial_xyz[i,1]
-            ys[6*(i+1)+2] = initial_xyz[i,2]
+            ys[6*i+6] = x
+            ys[6*(i+1)+1] = y
+            ys[6*(i+1)+2] = z
             ys[6*(i+1)+3] = n*y/2
             ys[6*(i+1)+4] = -2*n*x
             ys[6*(i+1)+5] = -n*z*tanth
@@ -606,9 +599,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             x = initial_xyz[i,0]
             y = initial_xyz[i,1]
             z = initial_xyz[i,2]
-            ys[6*i+6] = initial_xyz[i,0]
-            ys[6*(i+1)+1] = initial_xyz[i,1]
-            ys[6*(i+1)+2] = initial_xyz[i,2]
+            ys[6*i+6] = x
+            ys[6*(i+1)+1] = y
+            ys[6*(i+1)+2] = z
 
             # compute velocity initial conditions
             si = np.sin(inc)
@@ -647,9 +640,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             x = initial_xyz[i,0]
             y = initial_xyz[i,1]
             z = initial_xyz[i,2]
-            ys[6*i+6] = initial_xyz[i,0]
-            ys[6*(i+1)+1] = initial_xyz[i,1]
-            ys[6*(i+1)+2] = initial_xyz[i,2]
+            ys[6*i+6] = x
+            ys[6*(i+1)+1] = y
+            ys[6*(i+1)+2] = z
 
             # compute velocity initial conditions
             si = np.sin(inc)
