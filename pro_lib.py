@@ -32,7 +32,7 @@ List of Functions:
 
     9) initial_conditions 
     
-    # notation consistent with the book 
+    # notation consistent with the book and Morgan et. all (https://arc.aiaa.org/doi/10.2514/1.55705)
     # Spacecraft Formation Flying Dynamics, control and navigation
 """
 
@@ -159,26 +159,38 @@ def hcw_statespace_to_phasemagnitude(magnitude,phase,mean_motion):
     return state_init
 
 
-def dyn_chief_deputies(v,t,mu,r_e,J2,num_deputies):
+def dyn_chief_deputies(y,t,mu=398600.4418,r_e=6378.1363,J2=1082.64*10**(-6),num_deputies=0):
 
-    #----------------------
-
-    # No Drag
-
-    #----------------------
     """
-    Dynamics is Stacked
-    [chief deputy1 deputy2 ....]^{T}
+    Returns a vector containing the derivatives of each of the chief orbital 
+    parameter and each element of states of the deputies, given the current 
+    swarm state. Intended for use with scipy.integrate.odeint. Implements J2
+    dynamics, neglects drag.
     
-    mu = param[0]
-    k_J2 = param[1] 
-    num_deputies = param[2] 
-    
-    """
+    Parameters
+    ----------
+    y : array, shape(6*(number of deputies+1))
+        State of the swarm at this time instant. The first 6 entries are the
+        chief orbit parameters, using Xu Wang Parameters, from Nonlinear 
+        Dynamic Equations of Satellite Relative MotionAround an Oblate Earth 
+        (https://arc.aiaa.org/doi/10.2514/1.33616).
+        The next 6 should be the state of each deputy
+    mu : double
+        Gravitational constant (km^3/s^2). The default is 398600.4418 for Earth.
+    r_e : double 
+        Planet radius (km). The default is 6378.1363 for Earth.
+    J2 : double
+        J2 coefficient. The default is 1082.64*10**(-6) for Earth.
+    num_deputies : integer
+        Number of deputies to integrate. Default is none (should match y size TODO?)
 
+    Returns
+    -------
+    dydt : array, shape(6*(number of deputies + 1))
+        Derivatives of each element of the input y
+    """
 
     # Chief Satellite states 
-    y = v
     r = y[0]
     vx = y[1]
     h = y[2]
@@ -188,10 +200,11 @@ def dyn_chief_deputies(v,t,mu,r_e,J2,num_deputies):
     
     
 
-    k_J2 = (3/2)*J2*mu*(r_e**2)
+    k_J2 = (3/2)*J2*mu*(r_e**2) # J2 "force" coefficient. For Earth it is 2.633*10**10, km**5/s**2
 
     dydt = np.zeros([int(6+6*num_deputies)])
-
+    
+    #Compute frequently used trig functions
     si = np.sin(inc)
     ci = np.cos(inc)
     st = np.sin(theta)
@@ -200,8 +213,8 @@ def dyn_chief_deputies(v,t,mu,r_e,J2,num_deputies):
     si2 = (np.sin(inc))**2
     ci2 = (np.cos(inc))**2
     st2 = (np.sin(theta))**2
-    # ct2 = (np.cos(theta))**2
 
+    #Compute dynamics of chief hybrid orbital elements
     dydt[0] = vx
     dydt[1] = -mu/(r**2) + h**2/(r**3) - (k_J2/(r**4))*(1 - 3*si2*st2)
     dydt[2] = -(k_J2/(r**3))*(si2*np.sin(2*theta))
@@ -209,6 +222,7 @@ def dyn_chief_deputies(v,t,mu,r_e,J2,num_deputies):
     dydt[4] = -(k_J2/(2*h*r**3))*(np.sin(2*inc)*np.sin(2*theta) )
     dydt[5] = h/(r**2) + (2*k_J2/(h*r**3))*(ci2*st2)
     
+    #Compute parameters used for deputy dynamics
     wx = -(k_J2/(h*r**3))*(np.sin(2*inc)*st)
     wz = h/r**2
     
@@ -220,6 +234,7 @@ def dyn_chief_deputies(v,t,mu,r_e,J2,num_deputies):
     
     alpha_x = -(k_J2*np.sin(2*inc)*ct/(r**5)) + (3*vx*k_J2*np.sin(2*inc)*st/(h*(r**4))) - (8*(k_J2**2)*(si**3)*ci*(st**2)*ct)/((h**2)*(r**6))
 
+    #Compute relative deputy dynamics under J2 effects
     for i in range(int(num_deputies)):
         xi = y[6*(i+1)+0]
         yi = y[6*(i+1)+1]
@@ -419,12 +434,10 @@ def rotation_matrix_eci_to_lvlh(omega,theta,inc):
 
     return R.T
 
-#TODO: make default conditions for initial_condition_type or other failure mode?
-
 def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu=398600.4418,r_e=6378.1363,J2=1082.64*10**(-6)):
     
     """
-    Return a state vector containing the chief orbital parameters and the
+    Returns a state vector containing the chief orbital parameters and the
     initial state of the deputies for the desired swarm type by computing
     the required initial velocities.
     
@@ -455,8 +468,11 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     Returns
     -------
     ys : array, shape(6*(number of deputies + 1))
-        First 6 elements are the orbital elements of the chief orbit
-        ys[0:6] = input_info[0:6]
+        First 6 elements are the hybrid orbital elements of the chief orbit
+        ys[0:6] = (r0,vx0,h0,Omega0,inc0,theta0) 
+                or (initial radius, initial radial velocity, initial angular momentum, 
+                Right Ascension of the Ascending Node, initial inclination,
+                initial True Anomaly)
         Each subsequent 6 elements are the state vector of the deputies in 
         the LVLH frame relative to the chief.
 
@@ -484,7 +500,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     omega = om*np.pi/180            # Arg of Per [rad]
     nu = f*np.pi/180                # True Anomaly [rad]
 
-    # Xu Wang Parameters (https://arc.aiaa.org/doi/10.2514/1.33616)
+    # Xu Wang Parameters 
+    # From Nonlinear Dynamic Equationsof Satellite Relative MotionAround an Oblate Earth 
+    # (https://arc.aiaa.org/doi/10.2514/1.33616)
     h = np.sqrt(a*(1 - ecc**2)*mu)          # angular momentum [km**2/s]
     r = h**2/((1 + ecc*np.cos(nu))*mu)      # geocentric distance [km]
     v_x = mu*ecc/h*np.sin(nu)               # radial velocity [km/s]
@@ -522,13 +540,14 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     # initial conditions for the chief (orbit parameters)
 
     ys = np.zeros([sat_num*6],dtype = float)
-
-    ys[0] = r         #Semi major axis
-    ys[1] = v_x         #
-    ys[2] = h          #Angular momentum
-    ys[3] = Omega      #
-    ys[4] = inc       #
-    ys[5] = theta      #
+                                        #Notation in Morgan et. all
+    ys[0] = r       #Semi major axis    r0
+    ys[1] = v_x     #Radial Velocity    vx0 
+    ys[2] = h       #Angular momentum   h0 
+    ys[3] = Omega   #RA of Ascending N. Omega0                    
+    ys[4] = inc     #Inclination        inc0            
+    ys[5] = theta   #True Anomaly       theta0                    
+    
     
     # Initialize the initial conditions for the deputies in LVLH, 
     # as specified by the swarm dynamics requested
@@ -684,6 +703,8 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+4] = dyi_j -vydi + vyj
             ys[6*(i+1)+5] = dzi_j -vzdi + vzj
             return ys 
+        else:
+            raise ValueError("initial_condition_type is not one of the valid options")
         
 
 def rotate_x(angle):
