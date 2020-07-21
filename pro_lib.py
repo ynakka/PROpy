@@ -419,25 +419,46 @@ def rotation_matrix_eci_to_lvlh(omega,theta,inc):
 
     return R.T
 
+#TODO: make default conditions for initial_condition_type or other failure mode?
 
 def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu,r_e,J2):
     
     """
-    NoRev = input_info[0] # number of orbits
+    Return a state vector containing the chief orbital parameters and the
+    inital state of the deputies for the desired swarm type by computing
+    the required intial velocities.
     
-    # chief orbital parameters
-    altitude = input_info[1]
-    ecc = input_info[2]
-    INC = input_info[3]
-    Om = input_info[4]
-    om = input_info[5]
-    f = input_info[6]
+    Parameters
+    ----------
+    initial_condition_type : string
+        Specifies the type of swarm to intialize
+    input_info : array
+        Contents of the array are:
+            NoRev = input_info[0]: Number of orbits
+        Cheif Orbit parameters:
+            input_info[1]: Orbit altitude in km
+            input_info[2]: Orbit eccentricity
+            input_info[3]: Orbit inclination (degrees)
+            input_info[4]: Right Assencion of the Ascending Node (degrees)
+            input_info[5]: Argument of Perigee (degrees)
+            input_info[6]: True Anomoly (degrees)
+            input_info[7]: Number of deputies
+    initial_xyz : array, shape (number of deputies, 3)
+        The inital LVLH position of each deputy relative to the cheif. UNITS???
+    mu : double
+        Earth gravitational constant (km^3/s^2)
+    r_e : double 
+        Earth radius (km)
+    J2 : double
+        Earth J2 coefficient 
 
-    deputy_num = int(input_info[7]) 
-
-    fpo = input_info[8] # time steps per orbit
-
-    initial_xyz = np.zeros([num_deputy,3]) # intial position of the deputies
+    Returns
+    -------
+    ys : array, shape(6*(number of deputies + 1))
+        First 6 elements are the orbital elements of the chief orbit
+        ys[0:6] = input_info[0:6]
+        Each subsequent 6 elements are the state vector of the deputies in 
+        the LVLH frame relative to the chief.
 
     """
 
@@ -454,7 +475,6 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
 
     deputy_num = int(input_info[7]) 
 
-    fpo = input_info[8] # time steps per orbit
 
 
     ##----Constants--------------
@@ -502,11 +522,6 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     n = h/r**2                       # orbital rotation rate for non J2
     Pot_c = -mu/r - k_J2/(3*r**3)*(1 - 3*np.sin(inc)**2*np.sin(theta)**2)  
 
-     # simulation time
-    time = np.linspace(0,NoRev*period,int(period/(fpo)))  
-    print(time)
-    orbit_num = time/period               # time vector with units of orbits instead of seconds
-                                          # orbit = period of non J2 orbit
 
     if math.tan(theta) <4:
         tanth = math.tan(theta)

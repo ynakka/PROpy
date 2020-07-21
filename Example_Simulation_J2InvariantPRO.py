@@ -31,7 +31,7 @@ def main(input_info,initial_xyz,mu,r_e,J2):
 
     deputy_num = int(input_info[7]) 
 
-    fpo = input_info[8] # time steps per orbit
+    fpo = input_info[8] # time step size for each orbit
 
     # # Energy Matched 
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     J2 = 1082.64*10**(-6) #J2 Constant
     # info
     input_info = np.zeros([9]) 
-    input_info[0] = 1 #500 #no of orbits
+    input_info[0] = 1 #no of orbits
     input_info[1] = 500 #altitude
     input_info[2] = 0.0 #ecc
     input_info[3] = 60 #INC
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     input_info[5] = 60 #om
     input_info[6] = 20 #f
     input_info[7] = 3 #num_deputies
-    input_info[8] = 100 #20 #output per orbit
+    input_info[8] = 100 #Step size
 
     # intial position on deputies
     
