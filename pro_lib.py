@@ -495,7 +495,7 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     # Xu Wang Parameters
     h = np.sqrt(a*(1 - ecc**2)*mu)           # angular momentum [km**2/s]
     r = h**2/((1 + ecc*np.cos(nu))*mu)       # geocentric distance [km]
-    v_x = mu*ecc/h*np.sin(nu)               # radial velocity [km/s]
+    v_x = mu*ecc*np.sin(nu)/h              # radial velocity [km/s]
     theta = omega + nu                   # argument of latitude [rad]
 
     # chief velocity
@@ -531,9 +531,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     
     # initial conditions for the chief 
 
-    r0 = a
+    r0 = r
     h0 = np.sqrt(r0*(1-ecc**2)*mu)
-    vx0 = mu*ecc/(h0*np.sin(nu))
+    vx0 = mu*ecc*np.sin(nu)/h0
     Omega0 = Omega
     inc0 = inc
     theta0 = omega + nu
