@@ -12,7 +12,7 @@ def main(input_info,initial_xyz,mu,r_e,J2):
 
     initial_condition_type = "nonlinear_correction_linearized_j2_invariant"
 
-    # compute initial consitions for the chief and deputy
+    # compute initial conditions for the chief and deputy
     ys = pl.initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu,r_e,J2)
 
     # # assigning parameters 
@@ -108,7 +108,7 @@ def main(input_info,initial_xyz,mu,r_e,J2):
     # i = sol[:,4] #(orbit inclination)
     # theta = sol[:,5] # (argument of latitude)
 
-    # # Convert to cartesian coordinates
+    # # Convert to Cartesian coordinates
     # # see http://farside.ph.utexas.edu/teaching/celestial/Celestialhtml/node34.html
     # X = r*(np.cos(Omega)*np.cos(theta) - np.sin(Omega)*np.sin(theta)*np.cos(i))
     # Y = r*(np.sin(Omega)*np.cos(theta) + np.cos(Omega)*np.sin(theta)*np.cos(i))
