@@ -505,7 +505,7 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     # (https://arc.aiaa.org/doi/10.2514/1.33616)
     h = np.sqrt(a*(1 - ecc**2)*mu)          # angular momentum [km**2/s]
     r = h**2/((1 + ecc*np.cos(nu))*mu)      # geocentric distance [km]
-    v_x = mu*ecc/h*np.sin(nu)               # radial velocity [km/s]
+    v_x = mu*ecc*np.sin(nu)/h               # radial velocity [km/s]
     theta = omega + nu                      # argument of latitude [rad]
 
     # chief velocity
@@ -538,7 +538,12 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
         tanth =4
     
     # initial conditions for the chief (orbit parameters)
-
+    r0 = r
+    h0 = np.sqrt(r0*(1-ecc**2)*mu)
+    vx0 = mu*ecc*np.sin(nu)/h0
+    Omega0 = Omega
+    inc0 = inc
+    theta0 = omega + nu
     ys = np.zeros([sat_num*6],dtype = float)
                                         #Notation in Morgan et. all
     ys[0] = r       #Semi major axis    r0
