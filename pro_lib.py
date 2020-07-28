@@ -476,10 +476,17 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
         Each subsequent 6 elements are the state vector of the deputies in 
         the LVLH frame relative to the chief.
 
+    Raises
+    -------
+    ValueError("initial_condition_type is not one of the valid options")
+        If the provided initial_condition_type string is not one of the options:
+        "uncontrolled_swarm","linearized_period_matched_swarm",
+        "linearized_concentric_pro_swarm","no_crosstrack_drift_swarm",
+         "linearized_j2_invariant_swarm","nonlinear_correction_linearized_j2_invariant"
     """
 
     # assigning parameters 
-    NoRev = input_info[0] # number of orbits
+    NoRev = input_info[0] # number of orbits UNUSED
     # orbital parameters
 
     altitude = input_info[1]
