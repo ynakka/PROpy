@@ -496,7 +496,7 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     om = input_info[5]
     f = input_info[6]
 
-    deputy_num = int(input_info[7]) 
+    deputy_num = int(input_info[7])
 
     k_J2 = (3/2)*J2*mu*(r_e**2)     # J2 "force" coefficient. For Earth it is 2.633*10**10, km**5/s**2
 
@@ -714,9 +714,9 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
             ys[6*(i+1)+3] = dxi_j -vxdi + vxj
             ys[6*(i+1)+4] = dyi_j -vydi + vyj
             ys[6*(i+1)+5] = dzi_j -vzdi + vzj
-            return ys 
-        else:
-            raise ValueError("initial_condition_type is not one of the valid options")
+        return ys 
+    else:
+        raise ValueError("initial_condition_type is not one of the valid options")
         
 
 def rotate_x(angle):

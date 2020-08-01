@@ -14,7 +14,7 @@ def main(input_info,initial_xyz,mu,r_e,J2):
 
     # compute initial conditions for the chief and deputy
     ys = pl.initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu,r_e,J2)
-
+    print(ys)
     # # assigning parameters 
 
     NoRev = input_info[0] # number of orbits
