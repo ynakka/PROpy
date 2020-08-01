@@ -14,7 +14,7 @@ def main(input_info,initial_xyz,mu,r_e,J2):
 
     # compute initial conditions for the chief and deputy
     ys = pl.initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, mu,r_e,J2)
-
+    print(ys)
     # # assigning parameters 
 
     NoRev = input_info[0] # number of orbits
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     input_info[5] = 60 #om
     input_info[6] = 20 #f
     input_info[7] = 3 #num_deputies
-    input_info[8] = 100 #Step size
+    input_info[8] = 100 #Proportional to the number of steps to integrate over (# steps = period/input_info[8])
 
     # intial position on deputies
     
