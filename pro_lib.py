@@ -159,7 +159,7 @@ def hcw_statespace_to_phasemagnitude(magnitude,phase,mean_motion):
     return state_init
 
 
-def dyn_chief_deputies(y,t,mu=398600.4418,r_e=6378.1363,J2=1082.64*10**(-6),num_deputies=0):
+def dyn_chief_deputies(y,t,mu=398600.4418,r_e=6378.1363,J2=0.001082627,num_deputies=0):
 
     """
     Returns a vector containing the derivatives of each of the chief orbital 
