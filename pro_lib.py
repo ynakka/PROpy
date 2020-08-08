@@ -218,7 +218,7 @@ def dyn_chief_deputies(y,t,mu=398600.4418,r_e=6378.1363,J2=1082.64*10**(-6),num_
     dydt[0] = vx
     dydt[1] = -mu/(r**2) + h**2/(r**3) - (k_J2/(r**4))*(1 - 3*si2*st2)
     dydt[2] = -(k_J2/(r**3))*(si2*np.sin(2*theta))
-    dydt[3] = -(2*k_J2/(h*r**3))*(ci*si2)
+    dydt[3] = -(2*k_J2/(h*r**3))*(ci*st2)
     dydt[4] = -(k_J2/(2*h*r**3))*(np.sin(2*inc)*np.sin(2*theta) )
     dydt[5] = h/(r**2) + (2*k_J2/(h*r**3))*(ci2*st2)
     
