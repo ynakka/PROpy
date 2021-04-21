@@ -447,15 +447,14 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
         Specifies the type of swarm to initialize
     input_info : array
         Contents of the array are:
-            input_info[0]: Number of orbits
             Chief Orbit parameters:
-            input_info[1]: Orbit altitude in km
-            input_info[2]: Orbit eccentricity
-            input_info[3]: Orbit inclination (degrees)
-            input_info[4]: Right Ascension of the Ascending Node (degrees)
-            input_info[5]: Argument of Perigee (degrees)
-            input_info[6]: True Anomaly (degrees)
-            input_info[7]: Number of deputies
+            input_info[0]: Orbit altitude in km
+            input_info[1]: Orbit eccentricity
+            input_info[2]: Orbit inclination (degrees)
+            input_info[3]: Right Ascension of the Ascending Node (degrees)
+            input_info[4]: Argument of Perigee (degrees)
+            input_info[5]: True Anomaly (degrees)
+            input_info[6]: Number of deputies
     initial_xyz : array, shape (number of deputies, 3)
         The initial LVLH position of each deputy relative to the chief. UNITS???
     mu : double
@@ -486,17 +485,16 @@ def initial_conditions_deputy(initial_condition_type, input_info, initial_xyz, m
     """
 
     # assigning parameters 
-    NoRev = input_info[0] # number of orbits UNUSED
     # orbital parameters
 
-    altitude = input_info[1]
-    ecc = input_info[2]
-    INC = input_info[3]
-    Om = input_info[4]
-    om = input_info[5]
-    f = input_info[6]
+    altitude = input_info[0]
+    ecc = input_info[1]
+    INC = input_info[2]
+    Om = input_info[3]
+    om = input_info[4]
+    f = input_info[5]
 
-    deputy_num = int(input_info[7])
+    deputy_num = int(input_info[6])
 
     k_J2 = (3/2)*J2*mu*(r_e**2)     # J2 "force" coefficient. For Earth it is 2.633*10**10, km**5/s**2
 
